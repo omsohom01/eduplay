@@ -10,7 +10,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "EduPlay AI Learning Companion",
   description: "Interactive educational platform for children aged 3-12",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -31,6 +30,3 @@ export default function RootLayout({
   )
 }
 
-
-
-import './globals.css'

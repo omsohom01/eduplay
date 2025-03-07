@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Home, BookOpen, BarChart3, Info, LogIn } from "lucide-react"
+import { Menu, X, Home, BookOpen, BarChart3, Info, LogIn, Gamepad2 } from "lucide-react"
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -47,6 +47,13 @@ export function Navbar() {
           >
             <BookOpen className="h-4 w-4" />
             <span>Subjects</span>
+          </Link>
+          <Link
+            href="/games"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+          >
+            <Gamepad2 className="h-4 w-4" />
+            <span>Games</span>
           </Link>
           <Link
             href="/dashboard"
@@ -113,6 +120,14 @@ export function Navbar() {
               <span>Subjects</span>
             </Link>
             <Link
+              href="/games"
+              className="flex items-center gap-2 px-4 py-3 text-sm font-medium hover:bg-muted/50 rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Gamepad2 className="h-4 w-4" />
+              <span>Games</span>
+            </Link>
+            <Link
               href="/dashboard"
               className="flex items-center gap-2 px-4 py-3 text-sm font-medium hover:bg-muted/50 rounded-md"
               onClick={() => setIsMenuOpen(false)}
@@ -147,3 +162,4 @@ export function Navbar() {
     </header>
   )
 }
+

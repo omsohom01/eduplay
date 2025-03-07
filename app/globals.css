@@ -50,6 +50,10 @@
   box-shadow: 0 0 20px rgba(var(--primary), 0.5);
 }
 
+.shadow-glow {
+  box-shadow: 0 0 15px rgba(147, 51, 234, 0.3);
+}
+
 .glow-math {
   box-shadow: 0 0 20px rgba(var(--math), 0.5);
 }
@@ -255,3 +259,28 @@
     linear-gradient(45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%);
   background-size: 20px 20px;
 }
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.drop-shadow-glow {
+  filter: drop-shadow(0 0 5px rgba(147, 51, 234, 0.5));
+}
+
