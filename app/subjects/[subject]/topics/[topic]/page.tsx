@@ -3,8 +3,15 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, RefreshCw } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { QuizEngine } from "@/components/quiz-engine"
+import { GoogleGenerativeAI } from "@google/generative-ai"
+
+// Initialize the Gemini API
+const GEMINI_API_KEY = "AIzaSyDiaCC3dAZS8ZiDU1uF8YfEu9PoWy8YLoA"
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
 // This would typically come from a database or API
 const topicsData = {
@@ -17,43 +24,6 @@ const topicsData = {
       subjectColor: "bg-math",
       level: "Beginner",
       ageRange: "3-5",
-      questions: [
-        {
-          id: "math-count-1",
-          question: "How many apples are there?",
-          options: ["2", "3", "4", "5"],
-          correctAnswer: 2,
-          explanation: "There are 4 apples in the image. Count them one by one: 1, 2, 3, 4.",
-        },
-        {
-          id: "math-count-2",
-          question: "What number comes after 5?",
-          options: ["4", "5", "6", "7"],
-          correctAnswer: 2,
-          explanation: "The number that comes after 5 is 6. The numbers in order are: 1, 2, 3, 4, 5, 6, 7...",
-        },
-        {
-          id: "math-count-3",
-          question: "What number is between 2 and 4?",
-          options: ["1", "3", "5", "6"],
-          correctAnswer: 1,
-          explanation: "The number between 2 and 4 is 3. The numbers in order are: 1, 2, 3, 4, 5...",
-        },
-        {
-          id: "math-count-4",
-          question: "Count the dots: ● ● ● ●",
-          options: ["2", "3", "4", "5"],
-          correctAnswer: 2,
-          explanation: "There are 4 dots. Count them one by one: 1, 2, 3, 4.",
-        },
-        {
-          id: "math-count-5",
-          question: "What number comes before 3?",
-          options: ["1", "2", "3", "4"],
-          correctAnswer: 1,
-          explanation: "The number that comes before 3 is 2. The numbers in order are: 1, 2, 3, 4...",
-        },
-      ],
     },
     addition: {
       title: "Addition",
@@ -63,43 +33,33 @@ const topicsData = {
       subjectColor: "bg-math",
       level: "Beginner",
       ageRange: "5-7",
-      questions: [
-        {
-          id: "math-add-1",
-          question: "What is 2 + 3?",
-          options: ["4", "5", "6", "7"],
-          correctAnswer: 1,
-          explanation: "2 + 3 = 5. You can count up: 2, then 3 more: 3, 4, 5.",
-        },
-        {
-          id: "math-add-2",
-          question: "What is 4 + 2?",
-          options: ["5", "6", "7", "8"],
-          correctAnswer: 1,
-          explanation: "4 + 2 = 6. You can count up: 4, then 2 more: 5, 6.",
-        },
-        {
-          id: "math-add-3",
-          question: "What is 1 + 5?",
-          options: ["5", "6", "7", "8"],
-          correctAnswer: 1,
-          explanation: "1 + 5 = 6. You can count up: 1, then 5 more: 2, 3, 4, 5, 6.",
-        },
-        {
-          id: "math-add-4",
-          question: "What is 3 + 3?",
-          options: ["3", "5", "6", "9"],
-          correctAnswer: 2,
-          explanation: "3 + 3 = 6. This is like adding 3 twice, or doubling 3.",
-        },
-        {
-          id: "math-add-5",
-          question: "What is 5 + 4?",
-          options: ["8", "9", "10", "11"],
-          correctAnswer: 1,
-          explanation: "5 + 4 = 9. You can count up: 5, then 4 more: 6, 7, 8, 9.",
-        },
-      ],
+    },
+    subtraction: {
+      title: "Subtraction",
+      description: "Learn how to subtract numbers",
+      subject: "Mathematics",
+      subjectSlug: "math",
+      subjectColor: "bg-math",
+      level: "Beginner",
+      ageRange: "5-7",
+    },
+    multiplication: {
+      title: "Multiplication",
+      description: "Multiply numbers and learn times tables",
+      subject: "Mathematics",
+      subjectSlug: "math",
+      subjectColor: "bg-math",
+      level: "Intermediate",
+      ageRange: "7-9",
+    },
+    division: {
+      title: "Division",
+      description: "Understand division concepts",
+      subject: "Mathematics",
+      subjectSlug: "math",
+      subjectColor: "bg-math",
+      level: "Intermediate",
+      ageRange: "7-9",
     },
   },
   science: {
@@ -111,43 +71,33 @@ const topicsData = {
       subjectColor: "bg-science",
       level: "Beginner",
       ageRange: "3-6",
-      questions: [
-        {
-          id: "science-animals-1",
-          question: "Where do fish live?",
-          options: ["Desert", "Forest", "Water", "Mountains"],
-          correctAnswer: 2,
-          explanation: "Fish live in water. They have gills that allow them to breathe underwater.",
-        },
-        {
-          id: "science-animals-2",
-          question: "Which animal has a trunk?",
-          options: ["Lion", "Elephant", "Giraffe", "Zebra"],
-          correctAnswer: 1,
-          explanation: "Elephants have trunks, which they use for breathing, lifting objects, and getting water.",
-        },
-        {
-          id: "science-animals-3",
-          question: "Which animal can fly?",
-          options: ["Fish", "Bird", "Snake", "Frog"],
-          correctAnswer: 1,
-          explanation: "Birds have wings that allow them to fly through the air.",
-        },
-        {
-          id: "science-animals-4",
-          question: "Where do polar bears live?",
-          options: ["Desert", "Jungle", "Arctic", "Ocean"],
-          correctAnswer: 2,
-          explanation: "Polar bears live in the Arctic, where it's very cold and there's lots of ice and snow.",
-        },
-        {
-          id: "science-animals-5",
-          question: "Which animal has a shell?",
-          options: ["Dog", "Cat", "Turtle", "Rabbit"],
-          correctAnswer: 2,
-          explanation: "Turtles have shells that protect their bodies. The shell is like a home they carry with them.",
-        },
-      ],
+    },
+    plants: {
+      title: "Plants & Growth",
+      description: "Discover how plants grow and thrive",
+      subject: "Science",
+      subjectSlug: "science",
+      subjectColor: "bg-science",
+      level: "Beginner",
+      ageRange: "5-8",
+    },
+    weather: {
+      title: "Weather & Seasons",
+      description: "Explore different weather patterns and seasons",
+      subject: "Science",
+      subjectSlug: "science",
+      subjectColor: "bg-science",
+      level: "Beginner",
+      ageRange: "6-9",
+    },
+    solar_system: {
+      title: "Solar System",
+      description: "Learn about planets and space",
+      subject: "Science",
+      subjectSlug: "science",
+      subjectColor: "bg-science",
+      level: "Intermediate",
+      ageRange: "7-10",
     },
   },
   reading: {
@@ -159,43 +109,33 @@ const topicsData = {
       subjectColor: "bg-reading",
       level: "Beginner",
       ageRange: "3-5",
-      questions: [
-        {
-          id: "reading-alphabet-1",
-          question: "Which letter makes the 'buh' sound?",
-          options: ["A", "B", "C", "D"],
-          correctAnswer: 1,
-          explanation: "The letter B makes the 'buh' sound, as in 'ball' or 'boy'.",
-        },
-        {
-          id: "reading-alphabet-2",
-          question: "Which letter comes after A in the alphabet?",
-          options: ["Z", "B", "C", "D"],
-          correctAnswer: 1,
-          explanation: "B comes after A in the alphabet. The first few letters are: A, B, C, D...",
-        },
-        {
-          id: "reading-alphabet-3",
-          question: "Which letter makes the 'sss' sound?",
-          options: ["S", "T", "U", "V"],
-          correctAnswer: 0,
-          explanation: "The letter S makes the 'sss' sound, as in 'snake' or 'sun'.",
-        },
-        {
-          id: "reading-alphabet-4",
-          question: "Which word starts with the letter M?",
-          options: ["Dog", "Cat", "Mouse", "Fish"],
-          correctAnswer: 2,
-          explanation: "Mouse starts with the letter M. You can hear the 'mmm' sound at the beginning.",
-        },
-        {
-          id: "reading-alphabet-5",
-          question: "How many letters are in the alphabet?",
-          options: ["20", "24", "26", "30"],
-          correctAnswer: 2,
-          explanation: "There are 26 letters in the English alphabet, from A to Z.",
-        },
-      ],
+    },
+    phonics: {
+      title: "Phonics",
+      description: "Connect letters with their sounds",
+      subject: "Reading",
+      subjectSlug: "reading",
+      subjectColor: "bg-reading",
+      level: "Beginner",
+      ageRange: "4-6",
+    },
+    sight_words: {
+      title: "Sight Words",
+      description: "Learn common words by sight",
+      subject: "Reading",
+      subjectSlug: "reading",
+      subjectColor: "bg-reading",
+      level: "Beginner",
+      ageRange: "5-7",
+    },
+    comprehension: {
+      title: "Reading Comprehension",
+      description: "Understand what you read",
+      subject: "Reading",
+      subjectSlug: "reading",
+      subjectColor: "bg-reading",
+      level: "Intermediate",
+      ageRange: "7-10",
     },
   },
   coding: {
@@ -207,67 +147,363 @@ const topicsData = {
       subjectColor: "bg-coding",
       level: "Beginner",
       ageRange: "5-7",
-      questions: [
-        {
-          id: "coding-basics-1",
-          question: "What is an algorithm?",
-          options: ["A type of computer", "A step-by-step set of instructions", "A computer game", "A type of robot"],
-          correctAnswer: 1,
-          explanation: "An algorithm is a step-by-step set of instructions that tells a computer what to do.",
-        },
-        {
-          id: "coding-basics-2",
-          question: "Which of these is a coding direction?",
-          options: ["Jump", "Run", "Move forward", "Dance"],
-          correctAnswer: 2,
-          explanation: "'Move forward' is a coding direction that tells a character or object which way to go.",
-        },
-        {
-          id: "coding-basics-3",
-          question: "What happens if you give a computer the wrong instructions?",
-          options: [
-            "It will fix them for you",
-            "It will do what you told it to do, even if it's wrong",
-            "It will get angry",
-            "Nothing will happen",
-          ],
-          correctAnswer: 1,
-          explanation:
-            "Computers follow instructions exactly as given. If the instructions are wrong, the computer will still follow them, which might cause errors.",
-        },
-        {
-          id: "coding-basics-4",
-          question: "What is a bug in coding?",
-          options: [
-            "A small insect in the computer",
-            "A mistake in the code",
-            "A special coding tool",
-            "A type of computer",
-          ],
-          correctAnswer: 1,
-          explanation: "A bug is a mistake or error in the code that causes the program not to work as expected.",
-        },
-        {
-          id: "coding-basics-5",
-          question: "What is the first step in solving a coding problem?",
-          options: [
-            "Write the code immediately",
-            "Ask someone else to do it",
-            "Understand the problem",
-            "Test the solution",
-          ],
-          correctAnswer: 2,
-          explanation:
-            "The first step in solving any coding problem is to understand what the problem is asking you to do.",
-        },
-      ],
+    },
+    sequences: {
+      title: "Sequences",
+      description: "Learn about sequences and algorithms",
+      subject: "Coding",
+      subjectSlug: "coding",
+      subjectColor: "bg-coding",
+      level: "Beginner",
+      ageRange: "6-8",
+    },
+    loops: {
+      title: "Loops",
+      description: "Discover how loops work in programming",
+      subject: "Coding",
+      subjectSlug: "coding",
+      subjectColor: "bg-coding",
+      level: "Intermediate",
+      ageRange: "7-9",
+    },
+    conditionals: {
+      title: "Conditionals",
+      description: "Learn about if-then statements and logic",
+      subject: "Coding",
+      subjectSlug: "coding",
+      subjectColor: "bg-coding",
+      level: "Intermediate",
+      ageRange: "8-10",
     },
   },
+  // New subjects
+  music: {
+    notes: {
+      title: "Musical Notes",
+      description: "Learn to read and understand musical notes",
+      subject: "Music",
+      subjectSlug: "music",
+      subjectColor: "bg-music",
+      level: "Beginner",
+      ageRange: "5-8",
+    },
+    instruments: {
+      title: "Musical Instruments",
+      description: "Discover different musical instruments and their sounds",
+      subject: "Music",
+      subjectSlug: "music",
+      subjectColor: "bg-music",
+      level: "Beginner",
+      ageRange: "4-7",
+    },
+    rhythm: {
+      title: "Rhythm & Beat",
+      description: "Understand rhythm patterns and beats in music",
+      subject: "Music",
+      subjectSlug: "music",
+      subjectColor: "bg-music",
+      level: "Intermediate",
+      ageRange: "6-9",
+    },
+    composition: {
+      title: "Music Composition",
+      description: "Learn the basics of creating your own music",
+      subject: "Music",
+      subjectSlug: "music",
+      subjectColor: "bg-music",
+      level: "Advanced",
+      ageRange: "8-12",
+    },
+  },
+  art: {
+    colors: {
+      title: "Colors & Mixing",
+      description: "Learn about primary colors and how to mix them",
+      subject: "Art",
+      subjectSlug: "art",
+      subjectColor: "bg-art",
+      level: "Beginner",
+      ageRange: "3-6",
+    },
+    drawing: {
+      title: "Basic Drawing",
+      description: "Learn fundamental drawing techniques",
+      subject: "Art",
+      subjectSlug: "art",
+      subjectColor: "bg-art",
+      level: "Beginner",
+      ageRange: "5-8",
+    },
+    painting: {
+      title: "Painting Techniques",
+      description: "Explore different painting styles and methods",
+      subject: "Art",
+      subjectSlug: "art",
+      subjectColor: "bg-art",
+      level: "Intermediate",
+      ageRange: "7-10",
+    },
+    art_history: {
+      title: "Art History",
+      description: "Learn about famous artists and art movements",
+      subject: "Art",
+      subjectSlug: "art",
+      subjectColor: "bg-art",
+      level: "Advanced",
+      ageRange: "9-12",
+    },
+  },
+  geography: {
+    continents: {
+      title: "Continents & Oceans",
+      description: "Learn about the seven continents and five oceans",
+      subject: "Geography",
+      subjectSlug: "geography",
+      subjectColor: "bg-geography",
+      level: "Beginner",
+      ageRange: "5-8",
+    },
+    countries: {
+      title: "Countries & Capitals",
+      description: "Explore different countries and their capital cities",
+      subject: "Geography",
+      subjectSlug: "geography",
+      subjectColor: "bg-geography",
+      level: "Intermediate",
+      ageRange: "7-10",
+    },
+    landforms: {
+      title: "Landforms & Features",
+      description: "Learn about mountains, rivers, deserts, and other geographical features",
+      subject: "Geography",
+      subjectSlug: "geography",
+      subjectColor: "bg-geography",
+      level: "Intermediate",
+      ageRange: "8-11",
+    },
+    climate: {
+      title: "Climate Zones",
+      description: "Understand different climate types around the world",
+      subject: "Geography",
+      subjectSlug: "geography",
+      subjectColor: "bg-geography",
+      level: "Advanced",
+      ageRange: "9-12",
+    },
+  },
+  logic: {
+    patterns: {
+      title: "Patterns & Sequences",
+      description: "Identify and continue patterns in shapes, numbers, and objects",
+      subject: "Logic",
+      subjectSlug: "logic",
+      subjectColor: "bg-logic",
+      level: "Beginner",
+      ageRange: "4-7",
+    },
+    puzzles: {
+      title: "Logic Puzzles",
+      description: "Solve fun puzzles that develop critical thinking skills",
+      subject: "Logic",
+      subjectSlug: "logic",
+      subjectColor: "bg-logic",
+      level: "Intermediate",
+      ageRange: "7-10",
+    },
+    reasoning: {
+      title: "Deductive Reasoning",
+      description: "Learn to draw conclusions from given information",
+      subject: "Logic",
+      subjectSlug: "logic",
+      subjectColor: "bg-logic",
+      level: "Intermediate",
+      ageRange: "8-11",
+    },
+    problem_solving: {
+      title: "Problem Solving",
+      description: "Develop strategies to solve complex problems",
+      subject: "Logic",
+      subjectSlug: "logic",
+      subjectColor: "bg-logic",
+      level: "Advanced",
+      ageRange: "9-12",
+    },
+  },
+  // Programming languages
+  c_programming: {
+    intro: {
+      title: "Introduction to C",
+      description: "Learn the basics of C programming language",
+      subject: "C Programming",
+      subjectSlug: "c_programming",
+      subjectColor: "bg-coding",
+      level: "Beginner",
+      ageRange: "10-12",
+    },
+    variables: {
+      title: "Variables & Data Types",
+      description: "Understand different data types and how to use variables in C",
+      subject: "C Programming",
+      subjectSlug: "c_programming",
+      subjectColor: "bg-coding",
+      level: "Beginner",
+      ageRange: "10-12",
+    },
+    control_flow: {
+      title: "Control Flow",
+      description: "Learn about if statements, loops, and switch cases in C",
+      subject: "C Programming",
+      subjectSlug: "c_programming",
+      subjectColor: "bg-coding",
+      level: "Intermediate",
+      ageRange: "11-12",
+    },
+    functions: {
+      title: "Functions",
+      description: "Create and use functions in C programs",
+      subject: "C Programming",
+      subjectSlug: "c_programming",
+      subjectColor: "bg-coding",
+      level: "Intermediate",
+      ageRange: "11-12",
+    },
+  },
+  python: {
+    intro: {
+      title: "Introduction to Python",
+      description: "Learn the basics of Python programming language",
+      subject: "Python",
+      subjectSlug: "python",
+      subjectColor: "bg-coding",
+      level: "Beginner",
+      ageRange: "9-12",
+    },
+    variables: {
+      title: "Variables & Data Types",
+      description: "Understand different data types and how to use variables in Python",
+      subject: "Python",
+      subjectSlug: "python",
+      subjectColor: "bg-coding",
+      level: "Beginner",
+      ageRange: "9-12",
+    },
+    control_flow: {
+      title: "Control Flow",
+      description: "Learn about if statements, loops, and conditional expressions in Python",
+      subject: "Python",
+      subjectSlug: "python",
+      subjectColor: "bg-coding",
+      level: "Intermediate",
+      ageRange: "10-12",
+    },
+    functions: {
+      title: "Functions & Modules",
+      description: "Create and use functions and modules in Python",
+      subject: "Python",
+      subjectSlug: "python",
+      subjectColor: "bg-coding",
+      level: "Intermediate",
+      ageRange: "10-12",
+    },
+  },
+  java: {
+    intro: {
+      title: "Introduction to Java",
+      description: "Learn the basics of Java programming language",
+      subject: "Java",
+      subjectSlug: "java",
+      subjectColor: "bg-coding",
+      level: "Beginner",
+      ageRange: "10-12",
+    },
+    variables: {
+      title: "Variables & Data Types",
+      description: "Understand different data types and how to use variables in Java",
+      subject: "Java",
+      subjectSlug: "java",
+      subjectColor: "bg-coding",
+      level: "Beginner",
+      ageRange: "10-12",
+    },
+    control_flow: {
+      title: "Control Flow",
+      description: "Learn about if statements, loops, and switch cases in Java",
+      subject: "Java",
+      subjectSlug: "java",
+      subjectColor: "bg-coding",
+      level: "Intermediate",
+      ageRange: "11-12",
+    },
+    classes: {
+      title: "Classes & Objects",
+      description: "Understand object-oriented programming concepts in Java",
+      subject: "Java",
+      subjectSlug: "java",
+      subjectColor: "bg-coding",
+      level: "Advanced",
+      ageRange: "11-12",
+    },
+  },
+}
+
+interface Question {
+  question: string
+  options: string[]
+  correctAnswer: number
+  explanation: string
+  id?: string
+}
+
+// Function to fetch questions using the Gemini API
+const fetchQuestions = async (subject: string, topic: string): Promise<Question[]> => {
+  const prompt = `Generate exactly 5 multiple-choice quiz questions on the topic "${topic}" under the subject "${subject}".
+  Each question must have:
+  - A clear question text.
+  - Four answer choices.
+  - The index of the correct answer (0, 1, 2, or 3).
+  - A short explanation.
+
+  Return ONLY valid JSON formatted like this:
+  [
+    {
+      "question": "What is 2 + 2?",
+      "options": ["1", "2", "3", "4"],
+      "correctAnswer": 3,
+      "explanation": "2 + 2 equals 4."
+    }
+  ]`
+
+  try {
+    const result = await model.generateContent(prompt)
+    let responseText = result.response.text()
+    console.log("💡 AI Raw Response:", responseText)
+
+    // Fix: Remove unnecessary formatting (code blocks, newlines)
+    responseText = responseText.replace(/```json|```/g, "").trim()
+
+    // Ensure the response is valid JSON
+    const parsedQuestions: Question[] = JSON.parse(responseText)
+
+    // Add unique IDs to each question
+    const questionsWithIds = parsedQuestions.map((q, index) => ({
+      ...q,
+      id: `${subject}-${topic}-${Date.now()}-${index}`,
+    }))
+
+    return Array.isArray(questionsWithIds) ? questionsWithIds : []
+  } catch (error) {
+    console.error("❌ Error fetching questions:", error)
+    return []
+  }
 }
 
 export default function TopicPage({ params }: { params: { subject: string; topic: string } }) {
   const { subject, topic } = params
   const [mounted, setMounted] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [generationCount, setGenerationCount] = useState(0)
 
   useEffect(() => {
     setMounted(true)
@@ -281,10 +517,55 @@ export default function TopicPage({ params }: { params: { subject: string; topic
     notFound()
   }
 
-  if (!mounted) {
+  // Function to generate new questions
+  const generateNewQuestions = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      console.log(`Generating questions for ${topic} (${subject}) - Generation #${generationCount + 1}`)
+
+      const generatedQuestions = await fetchQuestions(subject, topic)
+
+      if (!generatedQuestions || generatedQuestions.length === 0) {
+        throw new Error("No questions were generated. Please try again.")
+      }
+
+      console.log(`Successfully generated ${generatedQuestions.length} questions`)
+      setQuestions(generatedQuestions)
+      setGenerationCount((prev) => prev + 1)
+    } catch (err) {
+      console.error("Error generating questions:", err)
+      setError("Failed to generate questions. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!mounted) return
+    generateNewQuestions()
+  }, [mounted, subject, topic])
+
+  if (!mounted || loading) {
     return (
       <div className="container py-12 flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <span className="ml-3 text-muted-foreground">Generating questions...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container py-12 flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="text-red-500 mb-4">⚠️ {error}</div>
+        <button
+          onClick={generateNewQuestions}
+          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+        >
+          Try Again
+        </button>
       </div>
     )
   }
@@ -316,15 +597,33 @@ export default function TopicPage({ params }: { params: { subject: string; topic
           </div>
         </div>
 
-        <QuizEngine
-          questions={topicData.questions}
-          subjectColor={topicData.subjectColor}
-          onComplete={(score, total) => {
-            console.log(`Quiz completed with score ${score}/${total}`)
-            // Here you would typically save the progress to a database
-          }}
-        />
+        {questions.length > 0 ? (
+          <QuizEngine
+            questions={questions}
+            subjectColor={topicData.subjectColor}
+            onComplete={(score, total) => {
+              console.log(`Quiz completed with score ${score}/${total}`)
+              // Here you would typically save the progress to a database
+            }}
+          />
+        ) : (
+          <div className="p-8 rounded-xl bg-secondary/30 border border-secondary text-center">
+            <p className="text-muted-foreground">No questions available for this topic yet.</p>
+          </div>
+        )}
+
+        <div className="mt-8 flex justify-center">
+          <Button
+            onClick={generateNewQuestions}
+            className={`${topicData.subjectColor} text-white flex items-center gap-2`}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Generate New Questions
+          </Button>
+        </div>
       </div>
     </div>
   )
 }
+
