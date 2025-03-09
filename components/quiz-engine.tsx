@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { CheckCircle, XCircle, ChevronRight, Award, AlertCircle } from "lucide-react"
+import { CheckCircle, XCircle, ChevronRight, Award, AlertCircle, RefreshCw } from "lucide-react"
 import confetti from "canvas-confetti"
 
 interface Question {
@@ -208,7 +208,9 @@ export function QuizEngine({ questions, subjectColor, onComplete }: QuizEnginePr
                 setQuizCompleted(false)
                 setShowExplanation(false)
               }}
+              className="flex items-center gap-2"
             >
+              <RefreshCw className="h-4 w-4" />
               Try Again
             </Button>
             <Button className={`${subjectColor} text-white`} onClick={() => (window.location.href = "/subjects")}>
@@ -220,3 +222,4 @@ export function QuizEngine({ questions, subjectColor, onComplete }: QuizEnginePr
     </div>
   )
 }
+

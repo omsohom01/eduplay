@@ -93,6 +93,36 @@ export default function SubjectsPage() {
       borderClass: "gradient-border-coding",
       gradientText: "from-logic to-indigo-400",
     },
+    {
+      title: "C Programming",
+      description: "Learn the fundamentals of C programming language.",
+      icon: Code,
+      slug: "c_programming",
+      color: "text-coding",
+      bgColor: "bg-coding/10",
+      borderClass: "gradient-border-coding",
+      gradientText: "from-coding to-blue-400",
+    },
+    {
+      title: "Python",
+      description: "Discover Python programming with fun, interactive lessons.",
+      icon: Code,
+      slug: "python",
+      color: "text-coding",
+      bgColor: "bg-coding/10",
+      borderClass: "gradient-border-coding",
+      gradientText: "from-coding to-green-400",
+    },
+    {
+      title: "Java",
+      description: "Explore Java programming concepts and object-oriented design.",
+      icon: Code,
+      slug: "java",
+      color: "text-coding",
+      bgColor: "bg-coding/10",
+      borderClass: "gradient-border-coding",
+      gradientText: "from-coding to-orange-400",
+    },
   ]
 
   return (
@@ -146,3 +176,4 @@ export default function SubjectsPage() {
     </div>
   )
 }
+
